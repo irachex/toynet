@@ -9,12 +9,12 @@ class Network:
     def params(self):
         return get_depend_params(self.loss)
 
-    def forward_propagation(self, targets=None, inputs=None):
+    def fprop(self, *targets, inputs=None):
         targets = targets or [self.loss]
         ret = forward_propagation(targets, inputs=inputs)
         return ret if len(targets) > 1 else ret[0]
 
-    def backward_propagation(self):
+    def bprop(self):
         return backward_propagation(self.loss)
 
 

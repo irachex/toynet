@@ -28,8 +28,8 @@ def main():
 
     for i in range(10000):
         optimizer.zero_grad()
-        loss_val = net.forward_propagation(inputs={'b': b, 'c': c})
-        net.backward_propagation()
+        loss_val = net.fprop(inputs={'b': b, 'c': c})
+        net.bprop()
         optimizer.step()
         if i % 500 == 0 or True:
             print('iter:', i, 'loss:', loss_val, 'x:', x.value, 'x.grad:', x.grad)
