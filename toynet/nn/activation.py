@@ -8,7 +8,8 @@ class ReLU(Node):
         return np.where(x.value < 0, 0, x.value)
 
     def backward(self):
-        pass
+        x = self.in_edges[0]
+        x.grad += np.where(x.value < 0, 0, self.grad)
 
 
 class Sigmoid(Node):

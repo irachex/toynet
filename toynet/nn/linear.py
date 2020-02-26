@@ -18,6 +18,7 @@ class Linear(Node):
 
         self.W = Param(name='{}:W'.format(self.name))
         self.b = Param(name='{}:b'.format(self.name))
+        return self
 
     def forward(self):
         x = self.in_edges[0].value

@@ -1,3 +1,5 @@
+import numpy as np
+
 from .param import Input, Const, Param
 
 
@@ -67,6 +69,7 @@ def forward_propagation(targets, inputs=None):
             pass
         else:
             x.value = x.forward()
+        x.grad = np.zeros_like(x.value)
 
     return [x.value for x in targets]
 

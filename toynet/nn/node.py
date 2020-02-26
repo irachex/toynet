@@ -52,10 +52,13 @@ class Node(OperatorMixin):
 
     def __init__(self, name=None):
         self.name = name or '{}{}'.format(self.__class__.__name__, gen_next())
+
         self.in_edges = []
         self.out_edges = []
+
         self.value = None
         self.grad = 0.
+        self.shape = None
 
     def forward(self):
         raise NotImplementedError
@@ -71,7 +74,14 @@ class Node(OperatorMixin):
         from .param import Const
         nodes = [x if isinstance(x, Node) else Const(x)
                  for x in nodes]
+        self._add_edges_from(nodes)
+
+        self.shape = nodes[0].shape
+        return self
+
+    def _add_edges_from(self, nodes):
         self.in_edges.extend(nodes)
+
         for x in nodes:
             x.out_edges.append(self)
         return self

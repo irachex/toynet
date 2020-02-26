@@ -7,10 +7,10 @@ def make_network():
 
     x = data
     for layer in [20, 20]:
-        w = tn.Param()
-        b = tn.Param()
+        w = tn.nn.Param()
+        b = tn.nn.Param()
         z = w @ data + b
-        a = tn.ReLU(z)
+        a = tn.nn.ReLU(z)
         x = a
 
     x = tn.softmax(x)
@@ -36,7 +36,7 @@ def evaluate():
 
 def main():
     train()
-    evaluate()
+    # evaluate()
 
 
 if __init__ == '__main__':

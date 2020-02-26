@@ -76,5 +76,3 @@ class MatMul(ArithmeticNode):
 
     def backward(self):
         pass
-
-
