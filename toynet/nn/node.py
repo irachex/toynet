@@ -23,7 +23,7 @@ class OperatorMixin:
         from .arithmetic import Mul
         return Mul()(self, other)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         from .arithmetic import Div
         return Div()(self, other)
 
@@ -47,18 +47,32 @@ class OperatorMixin:
         from .reduction import ReduceMean
         return ReduceMean(axis=axis, keepdims=keepdims)(self)
 
+    def reshape(self, to_shape):
+        from .reduction import Reshape
+        return Reshape(to_shape)(self)
+
 
 class Node(OperatorMixin):
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, requires_grad=True):
         self.name = name or '{}{}'.format(self.__class__.__name__, gen_next())
 
         self.in_edges = []
         self.out_edges = []
 
         self.value = None
-        self.grad = 0.
+        self._grad = 0.
         self.shape = None
+        self.requires_grad = requires_grad
+
+    @property
+    def grad(self):
+        return self._grad
+
+    @grad.setter
+    def grad(self, value):
+        if self.requires_grad:
+            self._grad = value
 
     def forward(self):
         raise NotImplementedError

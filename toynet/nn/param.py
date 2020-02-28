@@ -8,6 +8,7 @@ class Const(Node):
     def __init__(self, value, name=None):
         super().__init__(name=name)
         self.value = value
+        self.requires_grad = False
 
     def forward(self):
         return self.value
@@ -20,6 +21,7 @@ class Input(Node):
         self.shape = shape
         self.dtype = dtype
         self.value = np.zeros(shape=shape, dtype=dtype)
+        self.requires_grad = False
 
     def forward(self):
         return self.value

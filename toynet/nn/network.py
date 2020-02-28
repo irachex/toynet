@@ -5,14 +5,19 @@ from .param import Input, Const, Param
 
 class Network:
 
-    def __init__(self, loss):
+    def __init__(self, outputs=None, loss=None):
+        self.outputs = outputs or []
         self.loss = loss
 
     def params(self):
         return get_depend_params(self.loss)
 
+    def init_params(self, r=1e-3):
+        for p in self.params():
+            p.value = np.random.randn(*p.shape) * r
+
     def fprop(self, *targets, inputs=None):
-        targets = targets or [self.loss]
+        targets = targets or (self.outputs + [self.loss])
         ret = forward_propagation(targets, inputs=inputs)
         return ret if len(targets) > 1 else ret[0]
 
@@ -69,7 +74,7 @@ def forward_propagation(targets, inputs=None):
             pass
         else:
             x.value = x.forward()
-        x.grad = np.zeros_like(x.value)
+        x.grad = np.zeros_like(x.value, dtype=np.float32)
 
     return [x.value for x in targets]
 

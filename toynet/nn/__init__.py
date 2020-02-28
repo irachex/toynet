@@ -5,6 +5,7 @@ from .reduction import *
 from .activation import *
 from .conv import *
 from .pooling import *
+from .linear import *
 from .linalg import *
 from .rnn import *
 from .loss import *

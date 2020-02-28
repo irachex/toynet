@@ -14,7 +14,7 @@ kernel = np.array([
     [0, 1, 2],
     [2, 2, 0],
     [0, 1, 2],
-], dtype=np.float32).reshape(3, 3, 1)
+], dtype=np.float32).reshape(3, 3, 1, 1)
 
 # test case come from https://arxiv.org/pdf/1603.07285.pdf
 

@@ -27,7 +27,7 @@ class _ConvND(Node):
         in_channels = x.shape[-1]  # n, h, w, c
         self.in_channels = in_channels
 
-        self.kernel = Param(shape=(self.out_channels,) + self.kernel_size,
+        self.kernel = Param(shape=self.kernel_size + (in_channels, self.out_channels),
                             name='{}:W'.format(self.name))
         if self.bias:
             self.bias = Param(shape=(self.out_channels,),
@@ -74,7 +74,7 @@ class Conv2D(_ConvND):
 def conv2d_bf(out, x, kernel, bias, stride, padding):
     n, h, w, c = x.shape
     _, oh, ow, oc = out.shape
-    kh, kw, kc = kernel.shape
+    kh, kw, _, _ = kernel.shape
 
     for i in range(n):
 
@@ -86,12 +86,12 @@ def conv2d_bf(out, x, kernel, bias, stride, padding):
 
                     for jh in range(kh):
                         for jw in range(kw):
-                            for jc in range(kc):
+                            for jc in range(c):
                                 if (sh + jh < 0 or sh + jh >= h or
                                     sw + jw < 0 or sw + jw >= w):
                                     continue
 
-                                out[i, ih, iw, ic] += x[i, sh + jh, sw + jw, ic] * kernel[jh, jw, jc]
+                                out[i, ih, iw, ic] += x[i, sh + jh, sw + jw, jc] * kernel[jh, jw, jc, ic]
 
                     sw += stride
                 sh += stride
@@ -103,7 +103,7 @@ def conv2d_bf(out, x, kernel, bias, stride, padding):
 def conv2d_backward_bf(chain_grad, out, x, kernel, bias, stride, padding):
     n, h, w, c = x.shape
     _, oh, ow, oc = out.shape
-    kh, kw, kc = kernel.shape
+    kh, kw, _, _ = kernel.shape
 
     for i in range(n):
 
@@ -116,14 +116,14 @@ def conv2d_backward_bf(chain_grad, out, x, kernel, bias, stride, padding):
 
                     for jh in range(kh):
                         for jw in range(kw):
-                            for jc in range(kc):
+                            for jc in range(c):
                                 if (sh + jh < 0 or sh + jh >= h or
                                     sw + jw < 0 or sw + jw >= w):
                                     continue
 
-                                # out[i, ih, iw, ic] += x[i, sh + jh, sw + jw, ic] * kernel[jh, jw, jc]
-                                kernel.grad[jh, jw, jc] += x.value[i, sh + jh, sw + jw, ic] * chain_grad_i
-                                x.grad[jh, jw, jc] += kernel.value[i, jh, jw, jc] * chain_grad_i
+                                # out[i, ih, iw, ic] += x[i, sh + jh, sw + jw, jc] * kernel[jh, jw, jc, ic]
+                                kernel.grad[jh, jw, jc, ic] += x.value[i, sh + jh, sw + jw, jc] * chain_grad_i
+                                x.grad[i, sh + jh, sw + jw, jc] += kernel.value[jh, jw, jc, ic] * chain_grad_i
 
                     bias.grad[ic] += chain_grad_i
 

@@ -1,3 +1,5 @@
+import numpy as np
+
 from .node import Node
 
 
@@ -39,8 +41,19 @@ class Tanh(Node):
 class Softmax(Node):
 
     def forward(self):
-        x = self.in_edges[0]
-        return
+        x = self.in_edges[0].value
+        x_max = np.max(x, axis=-1, keepdims=True)
+        x_exp = np.exp(x - x_max)
+        s = np.sum(x_exp, axis=-1, keepdims=True)
+        return x_exp / s
 
     def backward(self):
-        pass
+        x = self.in_edges[0]
+        p = self.value
+        for i in range(p.shape[-1]):
+            for j in range(p.shape[-1]):
+                if i == j:
+                    x.grad[:, i] += p[:, i] * (1 - p[:, i]) * self.grad[:, i]
+                else:
+                    x.grad[:, i] += - p[:, i] * p[:, j] * self.grad[:, i]
+

@@ -56,7 +56,7 @@ class Pooling2D(Pooling):
     def backward(self):
         x = self.in_edges[0]
         return pooling_2d_backward_bf(
-            self.grad, self.value, self.switch, x, self.kernel, self.stride, self.padding, mode=self.mode)
+            self.grad, self.value, self.switch, x, self.window_size, self.stride, self.padding, mode=self.mode)
 
 
 
@@ -91,10 +91,10 @@ def pooling_2d_bf(out, switch, x, window_size, stride, padding, mode):
                 for iw in range(ow):
                     ph0, ph1 = max(sh, 0), min(sh + wh, h)
                     pw0, pw1 = max(sw, 0), min(sw + ww, w)
-                    out[i, ih, iw, ic] = fn(x[:, ph0:ph1, pw0:pw1, ic])
+                    out[i, ih, iw, ic] = fn(x[i, ph0:ph1, pw0:pw1, ic])
                     if argfn:
-                        idx = argfn(x[:, ph0:ph1, pw0:pw1, ic])
-                        switch[i, ih, iw, ic] = (idx / wh, idx % wh)
+                        idx = argfn(x[i, ph0:ph1, pw0:pw1, ic])
+                        switch[i, ih, iw, ic] = (int(idx / wh), int(idx % wh))
 
                     sw += stride
                 sh += stride
@@ -116,12 +116,17 @@ def pooling_2d_backward_bf(chain_grad, out, switch, x, window_size, stride, padd
                     chain_grad_i = chain_grad[i, ih, iw, ic]
 
                     if mode == 'max':
-                        x, y = self.switch[i, ih, iw, ic]
-                        x.grad[i, x, y, ic] += chain_grad_i
+                        a, b = switch[i, ih, iw, ic]
+                        try:
+                            x.grad[i, a, b, ic] += chain_grad_i
+                        except Exception:
+                            from IPython import embed
+                            embed()
+                            raise
                     elif mode == 'avg':
                         ph0, ph1 = max(sh, 0), min(sh + wh, h)
                         pw0, pw1 = max(sw, 0), min(sw + ww, w)
-                        x.grad[:, ph0:ph1, pw0:pw1, ic] += chain_grad_i / (wh * ww)
+                        x.grad[i, ph0:ph1, pw0:pw1, ic] += chain_grad_i / (wh * ww)
 
                     sw += stride
                 sh += stride

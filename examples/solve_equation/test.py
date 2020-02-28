@@ -21,17 +21,16 @@ def main():
 
     net = tn.nn.Network(loss)
 
-    lr = 1e-3
+    lr = 1e-2
     optimizer = tn.optim.SGD(net.params(), lr=lr)
-    # optimizer = tn.optim.Momentum(loss, lr=lr)
-    # optimizer = tn.optim.Adam(loss, lr=lr)
+    # optimizer = tn.optim.Momentum(net.params(), lr=lr, beta=0.9)
+    optimizer = tn.optim.Adam(net.params(), lr=lr)
 
     for i in range(10000):
-        optimizer.zero_grad()
         loss_val = net.fprop(inputs={'b': b, 'c': c})
         net.bprop()
         optimizer.step()
-        if i % 500 == 0 or True:
+        if i % 500 == 0:
             print('iter:', i, 'loss:', loss_val, 'x:', x.value, 'x.grad:', x.grad)
         # if i > 10:
         #     break

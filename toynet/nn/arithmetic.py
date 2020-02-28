@@ -32,10 +32,12 @@ class Mul(ArithmeticNode):
         a.grad += b.value * self.grad
         b.grad += a.value * self.grad
 
-class Div(ArithmeticNode):
+class TrueDiv(ArithmeticNode):
 
     def backward(self):
         return
+
+Div = TrueDiv
 
 
 class Mod(ArithmeticNode):
@@ -55,7 +57,7 @@ class Pow(ArithmeticNode):
 class Exp(ArithmeticNode):
 
     def forward(self):
-        x = self.in_edges
+        x = self.in_edges[0]
         return np.exp(x)
 
     def backward(self):
@@ -65,7 +67,7 @@ class Exp(ArithmeticNode):
 class Log(ArithmeticNode):
 
     def forward(self):
-        x = self.in_edges
+        x = self.in_edges[0]
         return np.log(x)
 
     def backward(self):
